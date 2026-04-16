@@ -201,5 +201,43 @@
     }
   });
 </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  // Senin Firebase Yapılandırman
+  const firebaseConfig = {
+    apiKey: "AIzaSyDu_FN-2Skj4AMc0wK6VOEv1Rksa2GaZqo",
+    authDomain: "destek-88422.firebaseapp.com",
+    databaseURL: "https://destek-88422-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "destek-88422",
+    storageBucket: "destek-88422.firebasestorage.app",
+    messagingSenderId: "139505775164",
+    appId: "1:139505775164:web:2a01b73af60297c928c939"
+  };
+
+  // Firebase'i Başlat
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const sayacRef = ref(db, 'tiklama_sayisi');
+
+  // HTML Elemanlarını Tanımla
+  const sayacEkrani = document.getElementById('counter');
+  const tiklaButon = document.getElementById('click-button');
+
+  // 1. Veritabanından veriyi anlık çek ve ekrana yansıt
+  onValue(sayacRef, (snapshot) => {
+    const güncelDeger = snapshot.val();
+    sayacEkrani.innerText = güncelDeger !== null ? güncelDeger : 0;
+  });
+
+  // 2. Butona basıldığında Firebase üzerindeki sayıyı 1 artır
+  tiklaButon.addEventListener('click', () => {
+    runTransaction(sayacRef, (mevcutSayi) => {
+      return (mevcutSayi || 0) + 1;
+    });
+  });
+</script>
+
 </body>
 </html>
