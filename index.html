@@ -159,12 +159,12 @@
     </div>
   </div>
 </section>
+
 <footer>
   <strong>Okullar Güvende Olmalı</strong> &mdash; Tüm çocuklar için &bull; Sessiz kalmıyoruz.
 </footer>
 
 <script>
-  // Arka plan partikülleri için ayrı bir kapsam (scope)
   (function() {
     const particleContainer = document.getElementById('particles');
     if (particleContainer) {
@@ -182,7 +182,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  // Firebase Yapılandırması
+  // Konfigürasyon
   const firebaseConfig = {
     apiKey: "AIzaSyDu_FN-2Skj4AMc0wK6VOEv1Rksa2GaZqo",
     authDomain: "destek-88422.firebaseapp.com",
@@ -193,51 +193,56 @@
     appId: "1:139505775164:web:2a01b73af60297c928c939"
   };
 
+  // Modül Başlatma
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const sayacRef = ref(db, 'tiklama_sayisi');
 
+  // DOM Seçimleri
   const btn = document.getElementById('clickBtn');
   const counterEl = document.getElementById('counter');
   const mainContainer = document.querySelector('.container'); 
 
-  // 1. VERİYİ ÇEKME: Sayfa her açıldığında ve veritabanı her değiştiğinde çalışır
+  // Veri Okuma İşlemi
   onValue(sayacRef, (snapshot) => {
     const count = snapshot.val() || 0;
-    // Sayıyı yerel formatta (noktalı) yazdırır
-    counterEl.textContent = count.toLocaleString('tr-TR');
-    
-    // Zıplama efekti
-    counterEl.classList.remove('bump');
-    void counterEl.offsetWidth;
-    counterEl.classList.add('bump');
-  });
-
-  // 2. TIKLAMA OLAYI
-  btn.addEventListener('click', function(e) {
-    // Firebase verisini güvenli şekilde artır
-    runTransaction(sayacRef, (currentCount) => {
-      return (currentCount || 0) + 1;
-    });
-
-    // --- ANİMASYONLAR ---
-    
-    // Ripple (Dalgalanma) Efekti
-    const rect = btn.getBoundingClientRect();
-    const ripple = document.createElement('span');
-    ripple.className = 'ripple';
-    const size = btn.offsetWidth;
-    ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px;`;
-    btn.appendChild(ripple);
-    ripple.addEventListener('animationend', () => ripple.remove());
-
-    // Tıklama anındaki küçük partikül efekti
-    for (let i = 0; i < 4; i++) {
-      const p = document.createElement('div');
-      p.className = 'p';
-      p.style.cssText = `left:${30 + Math.random() * 40}%;bottom:40%;animation-duration:${2 + Math.random() * 3}s;animation-delay:${Math.random() * 0.3}s;opacity:0;width:3px;height:3px;`;
-      if (mainContainer) mainContainer.appendChild(p);
-      p.addEventListener('animationend', () => p.remove());
+    if (counterEl) {
+      counterEl.textContent = count.toLocaleString('tr-TR');
+      counterEl.classList.remove('bump');
+      void counterEl.offsetWidth; 
+      counterEl.classList.add('bump');
     }
   });
+
+  // Veri Yazma ve Animasyon İşlemi
+  if (btn) {
+    btn.addEventListener('click', function(e) {
+      // İşlem (Transaction)
+      runTransaction(sayacRef, (currentCount) => {
+        return (currentCount || 0) + 1;
+      });
+
+      // Dalgalanma Efekti
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      const size = btn.offsetWidth;
+      ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px;`;
+      btn.appendChild(ripple);
+      ripple.addEventListener('animationend', () => ripple.remove());
+
+      // Tıklama Partikülleri
+      for (let i = 0; i < 4; i++) {
+        const p = document.createElement('div');
+        p.className = 'p';
+        p.style.cssText = `left:${30 + Math.random() * 40}%;bottom:40%;animation-duration:${2 + Math.random() * 3}s;animation-delay:${Math.random() * 0.3}s;opacity:0;width:3px;height:3px;`;
+        if (mainContainer) {
+            mainContainer.appendChild(p);
+        }
+        p.addEventListener('animationend', () => p.remove());
+      }
+    });
+  }
 </script>
+</body>
+</html>
