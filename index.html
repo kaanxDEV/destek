@@ -172,40 +172,11 @@
     p.style.cssText = `left:${Math.random()*100}%;bottom:${Math.random()*30}%;animation-duration:${6+Math.random()*10}s;animation-delay:${Math.random()*8}s;opacity:0;`;
     container.appendChild(p);
   }
-  const btn = document.getElementById('clickBtn');
-  const counterEl = document.getElementById('counter');
-  const STORAGE_KEY = 'okul_dayanisma_count';
-  let count = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
-  counterEl.textContent = count.toLocaleString('tr-TR');
-
-  btn.addEventListener('click', function(e) {
-    count++;
-    localStorage.setItem(STORAGE_KEY, count);
-    counterEl.textContent = count.toLocaleString('tr-TR');
-    counterEl.classList.remove('bump');
-    void counterEl.offsetWidth;
-    counterEl.classList.add('bump');
-    const rect = btn.getBoundingClientRect();
-    const ripple = document.createElement('span');
-    ripple.className = 'ripple';
-    const size = btn.offsetWidth;
-    ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;`;
-    btn.appendChild(ripple);
-    ripple.addEventListener('animationend', () => ripple.remove());
-    for (let i = 0; i < 4; i++) {
-      const p = document.createElement('div');
-      p.className = 'p';
-      p.style.cssText = `left:${30+Math.random()*40}%;bottom:40%;animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*0.3}s;opacity:0;width:3px;height:3px;`;
-      container.appendChild(p);
-      p.addEventListener('animationend', () => p.remove());
-    }
-  });
-</script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  // Senin Firebase Yapılandırman
+  // Firebase Yapılandırması
   const firebaseConfig = {
     apiKey: "AIzaSyDu_FN-2Skj4AMc0wK6VOEv1Rksa2GaZqo",
     authDomain: "destek-88422.firebaseapp.com",
@@ -216,28 +187,50 @@
     appId: "1:139505775164:web:2a01b73af60297c928c939"
   };
 
-  // Firebase'i Başlat
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const sayacRef = ref(db, 'tiklama_sayisi');
 
-  // HTML Elemanlarını Tanımla
-  const sayacEkrani = document.getElementById('counter');
-  const tiklaButon = document.getElementById('click-button');
+  const btn = document.getElementById('clickBtn');
+  const counterEl = document.getElementById('counter');
+  const container = document.querySelector('.container'); // Partiküller için container'ı buluyoruz
 
-  // 1. Veritabanından veriyi anlık çek ve ekrana yansıt
+  // 1. VERİYİ ÇEKME: Sayfa açıldığında ve her tıklandığında sayı güncellenir
   onValue(sayacRef, (snapshot) => {
-    const güncelDeger = snapshot.val();
-    sayacEkrani.innerText = güncelDeger !== null ? güncelDeger : 0;
+    const count = snapshot.val() || 0;
+    counterEl.textContent = count.toLocaleString('tr-TR');
+    
+    // Sayı her değiştiğinde zıplama efekti
+    counterEl.classList.remove('bump');
+    void counterEl.offsetWidth;
+    counterEl.classList.add('bump');
   });
 
-  // 2. Butona basıldığında Firebase üzerindeki sayıyı 1 artır
-  tiklaButon.addEventListener('click', () => {
-    runTransaction(sayacRef, (mevcutSayi) => {
-      return (mevcutSayi || 0) + 1;
+  // 2. TIKLAMA OLAYI: Veriyi Firebase'e gönder ve animasyonları oynat
+  btn.addEventListener('click', function(e) {
+    // Firebase'deki sayıyı güvenli şekilde 1 artır
+    runTransaction(sayacRef, (currentCount) => {
+      return (currentCount || 0) + 1;
     });
+
+    // --- ANİMASYONLAR ---
+    
+    // Ripple (Dalgalanma) Efekti
+    const rect = btn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const size = btn.offsetWidth;
+    ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px;`;
+    btn.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+
+    // Partikül Efekti
+    for (let i = 0; i < 4; i++) {
+      const p = document.createElement('div');
+      p.className = 'p';
+      p.style.cssText = `left:${30 + Math.random() * 40}%;bottom:40%;animation-duration:${2 + Math.random() * 3}s;animation-delay:${Math.random() * 0.3}s;opacity:0;width:3px;height:3px;`;
+      container.appendChild(p);
+      p.addEventListener('animationend', () => p.remove());
+    }
   });
 </script>
-
-</body>
-</html>
